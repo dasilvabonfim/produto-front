@@ -17,7 +17,6 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Lista de produtos'),
         ),
         body: const ProductsList(), // Usar o componente ProductsList
       ),

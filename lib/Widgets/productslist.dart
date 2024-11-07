@@ -27,47 +27,75 @@ class _ProductsListState extends State<ProductsList> {
 
   Future<void> deleteProduct(int id) async {
     await http.delete(Uri.parse('http://localhost:3000/products/$id'));
-    fetchProducts(); // Refresh the list after deletion
+    fetchProducts();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Lista de Produtos'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProductFormScreen()),
+                MaterialPageRoute(builder: (context) => const ProductFormScreen()),
               );
-              fetchProducts(); // Refresh the list after adding a product
+              fetchProducts();
             },
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return ListTile(
-            title: Text(product.name),
-            subtitle: Text('\$${product.price}'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailScreen(product: product),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
               ),
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                await deleteProduct(product.id);
-              },
-            ),
-          );
-        },
+              child: ListTile(
+                title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('R\$${product.price}', style: const TextStyle(color: Colors.green)),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailScreen(product: product),
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductFormScreen(product: product),
+                          ),
+                        );
+                        fetchProducts();
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () async {
+                        await deleteProduct(product.id);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -124,15 +152,55 @@ class ProductDetailScreen extends StatelessWidget {
       appBar: AppBar(title: Text(product.name)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Nome: ${product.name}', style: const TextStyle(fontSize: 18)),
-            Text('Prece: \$${product.price}', style: const TextStyle(fontSize: 18)),
-            Text('Descrição: ${product.description}', style: const TextStyle(fontSize: 18)),
-            Text('Quantdade: ${product.quantity}', style: const TextStyle(fontSize: 18)),
-            Text('Data de criação: ${product.date.toLocal().toString().split(' ')[0]}', style: const TextStyle(fontSize: 18)),
-          ],
+        child: Card(
+          elevation: 4.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Nome: ${product.name}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('Preço: R\$${product.price}', style: const TextStyle(fontSize: 18, color: Colors.green)),
+                const SizedBox(height: 8),
+                Text('Descrição: ${product.description}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Quantidade: ${product.quantity}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 8),
+                Text('Data de criação: ${product.date.toLocal().toString().split(' ')[0]}', style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Editar'),
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductFormScreen(product: product),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete),
+                      label: const Text('Deletar'),
+                      onPressed: () async {
+                        await http.delete(Uri.parse('http://localhost:3000/products/${product.id}'));
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -140,7 +208,9 @@ class ProductDetailScreen extends StatelessWidget {
 }
 
 class ProductFormScreen extends StatefulWidget {
-  const ProductFormScreen({Key? key}) : super(key: key);
+  final Product? product;
+
+  const ProductFormScreen({Key? key, this.product}) : super(key: key);
 
   @override
   _ProductFormScreenState createState() => _ProductFormScreenState();
@@ -153,59 +223,130 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      nameController.text = widget.product!.name;
+      priceController.text = widget.product!.price.toString();
+      descriptionController.text = widget.product!.description;
+      quantityController.text = widget.product!.quantity.toString();
+    }
+  }
+
   Future<void> saveProduct() async {
     final product = Product(
-      id: 0, // Assuming 0 or null ID for a new product
+      id: widget.product?.id ?? 0,
       name: nameController.text,
       price: double.parse(priceController.text),
       description: descriptionController.text,
-      date: DateTime.now(),
+      date: widget.product?.date ?? DateTime.now(),
       quantity: int.parse(quantityController.text),
     );
 
-    await http.post(
-      Uri.parse('http://localhost:3000/products'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(product.toJson()),
-    );
+    if (widget.product == null) {
+      await http.post(
+        Uri.parse('http://localhost:3000/products'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(product.toJson()),
+      );
+    } else {
+      await http.put(
+        Uri.parse('http://localhost:3000/products/${product.id}'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(product.toJson()),
+      );
+    }
 
-    Navigator.pop(context); // Go back after saving
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Product')),
+      appBar: AppBar(title: const Text('Adicionar/Editar Produto')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Nome'),
+        child: Card(
+          elevation: 4.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira o nome';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: priceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Preço',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira o preço';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: descriptionController,
+                    decoration: const InputDecoration(
+                      labelText: 'Descrição',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira a descrição';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Quantidade',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, insira a quantidade';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        saveProduct();
+                      }
+                    },
+                    child: const Text('Salvar'),
+                  ),
+                ],
               ),
-              TextFormField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: 'Preco'),
-                keyboardType: TextInputType.number,
-              ),
-              TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Descrição'),
-              ),
-              TextFormField(
-                controller: quantityController,
-                decoration: const InputDecoration(labelText: 'Quantidade'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: saveProduct,
-                child: const Text('Salvar'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
