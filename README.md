@@ -1,16 +1,28 @@
-# produtos
+# Produtos
 
-A new Flutter project.
+Front-end de produtos. As funcionalidades principais incluem listar, editar e remover produtos.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- **Listar Produtos**: Exibe uma lista de todos os produtos disponíveis.
+- **Editar Produtos**: Permite a edição das informações de um produto existente.
+- **Remover Produtos**: Permite a remoção de produtos da lista.
+- **Adicioanr Produtos**: Peremite adicionar produtos à lista.
 
-A few resources to get you started if this is your first Flutter project:
+## Como Usar
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Baixe e instale o Flutter em [flutter.dev](https://flutter.dev/docs/get-started/install).
+2. Clone o repositório:
+    ```bash
+    git clone https://github.com/seu-usuario/produtos.git
+    ```
+3. Instale as dependências:
+    ```bash
+    flutter pub get
+    ```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+4. Inicie a pagina:
+    ```bash
+    flutter run
+    ```
+

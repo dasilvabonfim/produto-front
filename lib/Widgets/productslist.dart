@@ -171,33 +171,6 @@ class ProductDetailScreen extends StatelessWidget {
                 Text('Quantidade: ${product.quantity}', style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 8),
                 Text('Data de criação: ${product.date.toLocal().toString().split(' ')[0]}', style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Editar'),
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductFormScreen(product: product),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.delete),
-                      label: const Text('Deletar'),
-                      onPressed: () async {
-                        await http.delete(Uri.parse('http://localhost:3000/products/${product.id}'));
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
