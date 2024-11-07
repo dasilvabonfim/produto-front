@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
         ),
-        body: const ProductsList(), // Usar o componente ProductsList
+        body: const ProductsList(),
       ),
     );
   }
