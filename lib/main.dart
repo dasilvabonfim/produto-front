@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
+          title: const Text('Lista de produtos gamer muito baratos'),
         ),
         body: const ProductsList(),
       ),
