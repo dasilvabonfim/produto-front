@@ -12,6 +12,7 @@ Front-end de produtos. As funcionalidades principais incluem listar, editar e re
 ## Como Usar
 
 1. Baixe e instale o Flutter em [flutter.dev](https://flutter.dev/docs/get-started/install).
+
 2. Clone o repositório:
     ```bash
     git clone https://github.com/seu-usuario/produtos.git
